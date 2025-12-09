@@ -8,7 +8,7 @@ import os
 # 1. 페이지 설정
 # ---------------------------
 st.set_page_config(
-    page_title="여행 연구 챗봇",
+    page_title="여행 챗봇",
     page_icon="✈️",  # 따옴표 오류 수정 완료
     layout="wide"
 )
@@ -133,7 +133,7 @@ if hide_sidebar:
 if "selected_city" not in st.session_state:
     st.session_state["selected_city"] = None
 
-st.title("✈️ 나만의 여행 공동 생산자")
+st.title("✈️ 여행AI챗봇")
 
 # [STEP 1] 도시 선택 화면
 if st.session_state["selected_city"] is None:
