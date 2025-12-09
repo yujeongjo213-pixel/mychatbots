@@ -139,7 +139,7 @@ st.title("✈️ 여행AI챗봇")
 if st.session_state["selected_city"] is None:
     st.subheader("떠나고 싶은 여행지를 선택해주세요")
     # LA를 로스앤젤레스로 수정
-    cities = ["도쿄", "파리", "라스베거스", "로스앤젤레스", "시드니", "베이징", "뉴욕"]
+    cities = ["도쿄", "파리", "로스앤젤레스", "시드니", "뉴욕"]
     cols = st.columns(4)
     for i, city in enumerate(cities):
         if cols[i % 4].button(city, use_container_width=True):
