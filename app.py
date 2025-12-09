@@ -48,36 +48,34 @@ interaction = "Response"    # Response(수동), Clarifying(역질문)
 hide_sidebar = False        # 참가자에게 사이드바 숨김 여부
 
 # ---------------------------------------------------------
-# [중요] 그룹별 조건 매핑 (선생님이 요청한 모든 조건)
+# [중요] 그룹별 조건 매핑
 # ---------------------------------------------------------
 
-# --- Study 1: 매체 비교 (일반 LLM vs Ontology LLM) ---
+# --- Study 1: 매체 비교 ---
 if group_id == "S1_Basic":
-    # 일반 ChatGPT (데이터 안 씀)
     use_ontology = False
     hide_sidebar = True
 
 elif group_id == "S1_Ontology":
-    # 여행 최적화 LLM (데이터 사용, 구조적 답변)
     use_ontology = True
     data_filter = "All" 
     interaction = "Response"
     hide_sidebar = True
 
-# --- Study 2: 정보 속성 비교 (Popularity vs Serendipity) ---
+# --- Study 2: 정보 속성 비교 ---
 elif group_id == "S2_Pop":
     use_ontology = True
-    data_filter = "High" # Popularity
+    data_filter = "High"
     interaction = "Response"
     hide_sidebar = True
 
 elif group_id == "S2_Seren":
     use_ontology = True
-    data_filter = "Low"  # Serendipity
+    data_filter = "Low"
     interaction = "Response"
     hide_sidebar = True
 
-# --- Study 3: 2x2 상호작용 비교 (Pop/Seren x Resp/Clar) ---
+# --- Study 3: 상호작용 비교 ---
 elif group_id == "S3_Pop_Resp":
     use_ontology = True
     data_filter = "High"
@@ -104,14 +102,14 @@ elif group_id == "S3_Seren_Clar":
 
 # ---------------------------------------------------------
 
-# [연구자용 수동 패널] (URL에 group 없으면 보임)
+# [연구자용 수동 패널] (사이드바 표시)
 if not hide_sidebar:
     with st.sidebar:
         try:
             img = Image.open("Fitlab.png")
             st.image(img, caption="Fitlab", use_container_width=True)
         except:
-            st.write("Fitlab")
+            st.write("Fitlab Logo")
         
         st.header("🔬 연구자용 설정")
         use_ontology = st.checkbox("온톨로지 데이터 사용", value=True)
@@ -122,13 +120,26 @@ if not hide_sidebar:
             st.session_state['messages'] = []
             st.rerun()
 
+# [참가자용 CSS] 사이드바 숨기기
 if hide_sidebar:
     st.markdown("""<style>[data-testid="stSidebar"] {display: none;}</style>""", unsafe_allow_html=True)
 
 
 # ---------------------------
-# 4. 프롬프트 엔지니어링
+# 4. 프롬프트 엔지니어링 및 UI
 # ---------------------------
+
+# ▼▼▼ [추가된 부분] 참가자 화면에 로고 표시 ▼▼▼
+if hide_sidebar:
+    try:
+        col1, col2 = st.columns([1, 9]) # 로고 크기 조절
+        with col1:
+            img = Image.open("Fitlab.png")
+            st.image(img, use_container_width=True)
+    except:
+        pass 
+# ▲▲▲ [여기까지] ▲▲▲
+
 if "selected_city" not in st.session_state:
     st.session_state["selected_city"] = None
 
@@ -156,9 +167,9 @@ else:
 
     selected_city = st.session_state['selected_city']
 
-    # --- 프롬프트 조립 시작 ---
+    # --- 프롬프트 조립 ---
     
-    # 1. 일반 LLM 모드 (Study 1 대조군)
+    # 1. 일반 LLM 모드
     if not use_ontology:
         system_prompt = f"""
         너는 '{selected_city}' 여행 가이드야. 
@@ -166,14 +177,14 @@ else:
         친구처럼 편안하게 반말로 대답해줘.
         """
     
-    # 2. 온톨로지 최적화 LLM 모드 (Study 1, 2, 3)
+    # 2. 온톨로지 최적화 LLM 모드
     else:
         # 데이터 필터링
         city_data = [d for d in travel_db if d['city'] == selected_city]
         
-        if data_filter == "High (Popularity)" or data_filter == "High":
+        if data_filter == "High" or data_filter == "High (Popularity)":
             final_data = [d for d in city_data if d['popularity'] == "High"]
-        elif data_filter == "Low (Serendipity)" or data_filter == "Low":
+        elif data_filter == "Low" or data_filter == "Low (Serendipity)":
             final_data = [d for d in city_data if d['popularity'] == "Low"]
         else:
             final_data = city_data # All
@@ -188,7 +199,7 @@ else:
         {json.dumps(final_data, ensure_ascii=False)}
         """
 
-        # 상호작용 조건 (Response vs Clarifying)
+        # 상호작용 조건
         if interaction == "Clarifying" or interaction == "Clarifying (역질문)":
             system_prompt += """
             [지침: 역질문 모드]
